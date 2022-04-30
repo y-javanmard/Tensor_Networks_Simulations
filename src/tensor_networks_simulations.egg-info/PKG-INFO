@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Name: tensor-networks-simulations
+Version: 0.1.dev0+d20220402
+Summary: Description string for tensor_networks_simulations
+License: UNKNOWN
+Platform: UNKNOWN
+Provides-Extra: tests
+Provides-Extra: develop
+
+UNKNOWN
+

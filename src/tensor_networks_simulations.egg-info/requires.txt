@@ -1,0 +1,12 @@
+
+[develop]
+pylint
+pytest
+pydocstyle
+pre-commit
+mypy
+
+[tests]
+pytest
+pytest-mock
+pytest-cov
