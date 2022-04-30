@@ -1,0 +1,9 @@
+[paths]
+source =
+    */site-packages
+
+[run]
+parallel = true
+source =
+    src
+    tests

@@ -1,0 +1,32 @@
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
+
+# Python egg metadata, regenerated from source files by setuptools.
+*.egg-info
+
+# Any virtualenv created with then name venv.
+venv/
+
+# .tox directory and its contents.
+.tox/
+
+# coverage related files.
+.coverage
+coverage.xml
+htmlcov/
+coverage-reports/
+
+# ignore the version.py file.
+version.py
+
+.eggs/
+*.mypy_cache/
+
+# Notebook files
+.ipynb_*
+
+data*
+*.pdf
