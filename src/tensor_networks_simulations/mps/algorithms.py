@@ -735,28 +735,16 @@ def tebd_vidal_mpdo_mpi4py_even(
         comm.send((data[f"{rank}"], error[f"{rank}"]), tag=rank, dest=0)
 
     if rank == 0:
-        rho.Ms[rank * rank_L : rank * rank_L + rank_L] = data[f"{rank}"].Ms[
-            rank * rank_L : rank * rank_L + rank_L
-        ]
-        rho.Ss[rank * rank_L : rank * rank_L + rank_L] = data[f"{rank}"].Ss[
-            rank * rank_L : rank * rank_L + rank_L
-        ]
-        rho.bonds[rank * rank_L : rank * rank_L + rank_L] = data[f"{rank}"].bonds[
-            rank * rank_L : rank * rank_L + rank_L
-        ]
+        rho.Ms[rank * rank_L : rank * rank_L + rank_L] = data[f"{rank}"].Ms[rank * rank_L : rank * rank_L + rank_L]
+        rho.Ss[rank * rank_L : rank * rank_L + rank_L] = data[f"{rank}"].Ss[rank * rank_L : rank * rank_L + rank_L]
+        rho.bonds[rank * rank_L : rank * rank_L + rank_L] = data[f"{rank}"].bonds[rank * rank_L : rank * rank_L + rank_L]
         truncation_err += error[f"{rank}"]
         for i in range(1, size):
             data[f"{i}"], error[f"{i}"] = comm.recv(source=i, tag=i)
             truncation_err += error[f"{i}"]
-            rho.Ms[i * rank_L : i * rank_L + rank_L] = data[f"{i}"].Ms[
-                i * rank_L : i * rank_L + rank_L
-            ]
-            rho.Ss[i * rank_L : i * rank_L + rank_L] = data[f"{i}"].Ss[
-                i * rank_L : i * rank_L + rank_L
-            ]
-            rho.bonds[i * rank_L : i * rank_L + rank_L] = data[f"{i}"].bonds[
-                i * rank_L : i * rank_L + rank_L
-            ]
+            rho.Ms[i * rank_L : i * rank_L + rank_L] = data[f"{i}"].Ms[i * rank_L : i * rank_L + rank_L]
+            rho.Ss[i * rank_L : i * rank_L + rank_L] = data[f"{i}"].Ss[i * rank_L : i * rank_L + rank_L]
+            rho.bonds[i * rank_L : i * rank_L + rank_L] = data[f"{i}"].bonds[i * rank_L : i * rank_L + rank_L]
     rho, truncation_err = comm.bcast((rho, truncation_err), root=0)
     return rho, truncation_err
 
@@ -817,60 +805,50 @@ def tebd_vidal_mpdo_mpi4py_odd(
         comm.send((data[f"{rank}"], error[f"{rank}"]), tag=rank, dest=0)
 
     if rank == 0:
-        rho.Ms[rank * rank_L + 1 : rank * rank_L + rank_L + 1] = data[f"{rank}"].Ms[
-            rank * rank_L + 1 : rank * rank_L + rank_L + 1
-        ]
-        rho.Ss[rank * rank_L + 1 : rank * rank_L + rank_L + 1] = data[f"{rank}"].Ss[
-            rank * rank_L + 1 : rank * rank_L + rank_L + 1
-        ]
-        rho.bonds[rank * rank_L + 1 : rank * rank_L + rank_L + 1] = data[
-            f"{rank}"
-        ].bonds[rank * rank_L + 1 : rank * rank_L + rank_L + 1]
+        rho.Ms[rank * rank_L + 1 : rank * rank_L + rank_L + 1] = data[f"{rank}"].Ms[rank * rank_L + 1 : rank * rank_L + rank_L + 1]
+        rho.Ss[rank * rank_L + 1 : rank * rank_L + rank_L + 1] = data[f"{rank}"].Ss[rank * rank_L + 1 : rank * rank_L + rank_L + 1]
+        rho.bonds[rank * rank_L + 1 : rank * rank_L + rank_L + 1] = data[f"{rank}"].bonds[rank * rank_L + 1 : rank * rank_L + rank_L + 1]
         truncation_err += error[f"{rank}"]
         for i in range(1, size):
             if i != size - 1:
                 data[f"{i}"], error[f"{i}"] = comm.recv(source=i, tag=i)
                 truncation_err += error[f"{i}"]
-                rho.Ms[i * rank_L + 1 : i * rank_L + rank_L + 1] = data[f"{i}"].Ms[
-                    i * rank_L + 1 : i * rank_L + rank_L + 1
-                ]
-                rho.Ss[i * rank_L + 1 : i * rank_L + rank_L + 1] = data[f"{i}"].Ss[
-                    i * rank_L + 1 : i * rank_L + rank_L + 1
-                ]
-                rho.bonds[i * rank_L + 1 : i * rank_L + rank_L + 1] = data[
-                    f"{i}"
-                ].bonds[i * rank_L + 1 : i * rank_L + rank_L + 1]
+                rho.Ms[i * rank_L + 1 : i * rank_L + rank_L + 1] = data[f"{i}"].Ms[i * rank_L + 1 : i * rank_L + rank_L + 1]
+                rho.Ss[i * rank_L + 1 : i * rank_L + rank_L + 1] = data[f"{i}"].Ss[i * rank_L + 1 : i * rank_L + rank_L + 1]
+                rho.bonds[i * rank_L + 1 : i * rank_L + rank_L + 1] = data[f"{i}"].bonds[i * rank_L + 1 : i * rank_L + rank_L + 1]
             else:
                 data[f"{i}"], error[f"{i}"] = comm.recv(source=i, tag=i)
                 truncation_err += error[f"{i}"]
                 rho.Ms[i * rank_L + 1 : L - 1] = data[f"{i}"].Ms[i * rank_L + 1 : L - 1]
                 rho.Ss[i * rank_L + 1 : L - 1] = data[f"{i}"].Ss[i * rank_L + 1 : L - 1]
-                rho.bonds[i * rank_L + 1 : L - 1] = data[f"{i}"].bonds[
-                    i * rank_L + 1 : L - 1
-                ]
+                rho.bonds[i * rank_L + 1 : L - 1] = data[f"{i}"].bonds[i * rank_L + 1 : L - 1]
     rho, truncation_err = comm.bcast((rho, truncation_err), root=0)
     return rho, truncation_err
 
 
-def tebd_2nd_order_vidal_mpdo_mpi4py(
-    rho: MPDO, Hs: List, chi_max: int, dt_list: np.ndarray, epsilon=1e-6, d=4
-):
+def tebd_2nd_order_vidal_mpdo_mpi4py(rho: MPDO, Hs: List, chi_max: int, dt_list: np.ndarray, epsilon=1e-6, d=4):
     truncation_err = 0
-    rho, discarded = tebd_vidal_mpdo_mpi4py_even(
-        rho, Hs, chi_max, dt_list=0.5 * dt_list, epsilon=epsilon, d=d
-    )
+    rho, discarded = tebd_vidal_mpdo_mpi4py_even(rho, Hs, chi_max, dt_list=0.5 * dt_list, epsilon=epsilon, d=d)
     truncation_err += discarded
     # print("------------------1")
-    rho, discarded = tebd_vidal_mpdo_mpi4py_odd(
-        rho, Hs, chi_max, dt_list=dt_list, epsilon=epsilon, d=d
-    )
+    rho, discarded = tebd_vidal_mpdo_mpi4py_odd(rho, Hs, chi_max, dt_list=dt_list, epsilon=epsilon, d=d)
     truncation_err += discarded
     # print("----------------------2")
-    rho, discarded = tebd_vidal_mpdo_mpi4py_even(
-        rho, Hs, chi_max, dt_list=0.5 * dt_list, epsilon=epsilon, d=d
-    )
+    rho, discarded = tebd_vidal_mpdo_mpi4py_even(rho, Hs, chi_max, dt_list=0.5 * dt_list, epsilon=epsilon, d=d)
     truncation_err += discarded
     return rho, truncation_err
+
+
+def tebd_1st_order_vidal_mpdo_mpi4py(rho: MPDO, Hs: List, chi_max: int, dt_list: np.ndarray, epsilon=1e-6, d=4):
+    truncation_err = 0
+    rho, discarded = tebd_vidal_mpdo_mpi4py_even(rho, Hs, chi_max, dt_list=dt_list, epsilon=epsilon, d=d)
+    truncation_err += discarded
+    # print("------------------1")
+    rho, discarded = tebd_vidal_mpdo_mpi4py_odd(rho, Hs, chi_max, dt_list=dt_list, epsilon=epsilon, d=d)
+    truncation_err += discarded
+    # print("----------------------2")
+    return rho, truncation_err
+
 
 
 def one_time_step_2nd_order(rho, Hs, chi_max, L, dt_list, epsilon=10 ** (-8)):
@@ -898,30 +876,14 @@ def one_time_step_2nd_order_2approach(
         rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(0, L, 2), epsilon=epsilon
     )
     disc += disc_err
-    rho, disc_err = tebd_mpdo(
-        rho,
-        Hs,
-        chi_max,
-        0.5 * dt_list,
-        lattice_sites=range(1, L - 1, 2),
-        epsilon=epsilon,
-    )
+    rho, disc_err = tebd_mpdo(rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(1, L - 1, 2), epsilon=epsilon)
     disc += disc_err
 
     rho = apply_mixed_gate_mpdo(rho, Gs)
 
-    rho, disc_err = tebd_mpdo(
-        rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(0, L, 2), epsilon=epsilon
-    )
+    rho, disc_err = tebd_mpdo(rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(0, L, 2), epsilon=epsilon)
     disc += disc_err
-    rho, disc_err = tebd_mpdo(
-        rho,
-        Hs,
-        chi_max,
-        0.5 * dt_list,
-        lattice_sites=range(1, L - 1, 2),
-        epsilon=epsilon,
-    )
+    rho, disc_err = tebd_mpdo(rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(1, L - 1, 2), epsilon=epsilon)
     disc += disc_err
     return rho, disc_err
 
@@ -932,56 +894,24 @@ def tebd_2nd_order_LPTN_thermal(
 
     if evolve_auxiliary:
         disc = 0
-        rho, discard = TEBD_alg_S_A(
-            rho,
-            Hs,
-            chi_max,
-            0.5 * dt_list,
-            lattice_sites=range(0, L, 2),
-            epsilon=epsilon,
-        )
+        rho, discard = TEBD_alg_S_A(rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(0, L, 2), epsilon=epsilon)
         disc += discard
 
-        rho, discard = TEBD_alg_S_A(
-            rho, Hs, chi_max, dt_list, lattice_sites=range(1, L - 1, 2), epsilon=epsilon
-        )
+        rho, discard = TEBD_alg_S_A(rho, Hs, chi_max, dt_list, lattice_sites=range(1, L - 1, 2), epsilon=epsilon)
         disc += discard
 
-        rho, discard = TEBD_alg_S_A(
-            rho,
-            Hs,
-            chi_max,
-            0.5 * dt_list,
-            lattice_sites=range(0, L, 2),
-            epsilon=epsilon,
-        )
+        rho, discard = TEBD_alg_S_A(rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(0, L, 2), epsilon=epsilon)
         disc += discard
 
     else:
         disc = 0
-        rho, discard = TEBD_alg_S(
-            rho,
-            Hs,
-            chi_max,
-            0.5 * dt_list,
-            lattice_sites=range(0, L, 2),
-            epsilon=epsilon,
-        )
+        rho, discard = TEBD_alg_S(rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(0, L, 2), epsilon=epsilon)
         disc += discard
 
-        rho, discard = TEBD_alg_S(
-            rho, Hs, chi_max, dt_list, lattice_sites=range(1, L - 1, 2), epsilon=epsilon
-        )
+        rho, discard = TEBD_alg_S(rho, Hs, chi_max, dt_list, lattice_sites=range(1, L - 1, 2), epsilon=epsilon)
         disc += discard
 
-        rho, discard = TEBD_alg_S(
-            rho,
-            Hs,
-            chi_max,
-            0.5 * dt_list,
-            lattice_sites=range(0, L, 2),
-            epsilon=epsilon,
-        )
+        rho, discard = TEBD_alg_S(rho, Hs, chi_max, 0.5 * dt_list, lattice_sites=range(0, L, 2), epsilon=epsilon)
         disc += discard
 
     return rho, disc
