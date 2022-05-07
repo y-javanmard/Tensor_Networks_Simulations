@@ -40,7 +40,25 @@ def spin_operator(N):
     return sx_list, sy_list, sz_list, sp_list, sm_list
 
 
-def integrate(L, hx, hz, Jx, Jy, Jz, psi0, tlist, gammas, solver):
+def integrate(L, hx, hz, Jx, Jy, Jz, psi0, tlist, gammas, solver, noise_model="spin_flip"):
+    """_summary_
+
+    Args:
+        L (_type_): _description_
+        hx (_type_): _description_
+        hz (_type_): _description_
+        Jx (_type_): _description_
+        Jy (_type_): _description_
+        Jz (_type_): _description_
+        psi0 (_type_): _description_
+        tlist (_type_): _description_
+        gammas (_type_): _description_
+        solver (_type_): _description_
+        noise_model (str, optional): depolarizng, dephasing. Defaults to "spin_flip".
+
+    Returns:
+        _type_: _description_
+    """
     sx_list, sy_list, sz_list, sp_list, sm_list = spin_operator(L)
     # si = qeye(2)
     # sx = sigmax()
@@ -70,10 +88,19 @@ def integrate(L, hx, hz, Jx, Jy, Jz, psi0, tlist, gammas, solver):
     # collapse operators
     c_op_list = []
 
-    # spin dephasing
+    # spin flip
+    
     for n in range(L):
         if gammas[n] > 0.0:
-            c_op_list.append(np.sqrt(gammas[n]) * sx_list[n])
+            if noise_model == "spin_flip":
+                noise_op = sx_list[n]
+            if noise_model == "depolarizing":
+                noise_op = sx_list[n]+sy_list[n]+sz_list[n]
+            c_op_list.append(np.sqrt(gammas[n]) * noise_op)
+    
+    
+                
+    
 
     # evolve and calculate expectation values
     if solver == "me":
