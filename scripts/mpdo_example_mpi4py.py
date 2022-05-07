@@ -49,7 +49,7 @@ def expectation_value(rho, op, site, d=2):
 
 def run(chi_max=32, scale=1, gamma=0.05):
 
-    L = 20
+    L = 32
     # chi_max = 100
     epsilon = 1e-6
     dt = 0.01
@@ -109,7 +109,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
                 mx = sum([expectation_value(rho, Hb.sx, i).real for i in range(L)]) / L
                 mxs.append(mx/ (sum([expectation_value(rho, Hb.s0, i).real for i in range(L)])/ L))
                 mzs.append(mz/ (sum([expectation_value(rho, Hb.s0, i).real for i in range(L)])/ L))
-                rhos.append(rho)
+                #rhos.append(rho)
                 ts.append((i + 1) * dt)
                 tr_erros.append(err)
                 # check_right_normalization(rho.Ms)
@@ -128,8 +128,8 @@ def run(chi_max=32, scale=1, gamma=0.05):
         cPickle.dump(mzs, fh)
     with open(path / f"ts_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
         cPickle.dump(ts, fh)
-    with open(path / f"rho_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-        cPickle.dump(rhos, fh)
+    #with open(path / f"rho_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+    #    cPickle.dump(rhos, fh)
     with open(path / f"trr_err_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
         cPickle.dump(tr_erros, fh)
 
@@ -168,8 +168,8 @@ def run(chi_max=32, scale=1, gamma=0.05):
 
 if __name__ == "__main__":
     plot_data = 0
-    for chi_max in [100]:
-        for scale in [1.0]:#, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]:
+    for chi_max in [200]:
+        for scale in [0.5, 0.75]:#, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]:
             for gamma in [0.001, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]:
                 mzs, mxs, ts, mz_ex, mx_ex, tr_erros = run(chi_max, scale, gamma)
                 if plot_data:
