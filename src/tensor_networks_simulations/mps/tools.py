@@ -274,6 +274,35 @@ def expectation_value_op(rho: MPDO, op: ndarray, j: int, d=2):
     return np.squeeze(C)
 
 
+
+def overlap(rho1, rho2):
+    Blist = rho1.Ms
+    SBlist = rho2.Ms
+    
+    L = len(Blist)
+    B_dag = np.conj(SBlist[0])  # ( p_i, q_i, b_i, b_i+1 )
+    BB = np.tensordot(
+        Blist[0], B_dag, axes=([0, 1], [0, 1])
+    )  # (a_i, a_i+1, b_i, b_i+1)
+    # print BB.shape, Blist[0].shape, SBlist[0].shape
+    i = 1
+    while i < L:
+        B_dag = np.conj(SBlist[i])  # ( p_i+1, q_i+1, b_i+1, b_i+2)
+        BB = np.tensordot(
+            BB, B_dag, axes=([3], [2])
+        )  # (a_i, a_i+1, b_i, p_i+1, q_i+1, b_i+2)
+        # print BB.shape
+        BB = np.tensordot(
+            BB, Blist[i], axes=([1, 3, 4], [2, 0, 1])
+        )  # (a_i, b_i, b_i+2, a_i+2)
+        # print BB.shape
+        BB = np.transpose(BB, (0, 3, 1, 2))
+        # print BB.shape, i+1
+        i = i + 1
+    return np.squeeze(BB)
+
+
+
 def apply_one_site_op_mpo(mpo: MPDO, op, site, d=2):
     Mlist = []
     for j in range(len(mpo.Ms)):

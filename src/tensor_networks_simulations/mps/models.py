@@ -135,10 +135,7 @@ class HBond(BondHamiltonian):
             lind += c * gamma * np.kron(op_list[i], np.conjugate(op_list[i]))
             lind += -c * 0.5 * gamma * np.kron((op_list[i].dag @ op_list[i]), iden)
             lind += (
-                -c
-                * 0.5
-                * gamma
-                * np.kron(iden, (np.conjugate(op_list[i]) @ op_list[i].T))
+                -c * 0.5 * gamma* np.kron(iden, (np.conjugate(op_list[i]) @ op_list[i].T))
             )
 
         return lind

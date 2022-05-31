@@ -70,6 +70,8 @@ def integrate(L, hx, hz, Jx, Jy, Jz, psi0, tlist, gammas, solver, noise_model="s
         expect_list.append(sx_list[i])
     for i in range(L):
         expect_list.append(sz_list[i])
+    
+    expect_list.append(sz_list[int(L/2)]*sz_list[int(L/2)+1])
 
     # construct the hamiltonian
     H = 0
@@ -94,9 +96,14 @@ def integrate(L, hx, hz, Jx, Jy, Jz, psi0, tlist, gammas, solver, noise_model="s
         if gammas[n] > 0.0:
             if noise_model == "spin_flip":
                 noise_op = sx_list[n]
+                c_op_list.append(np.sqrt(gammas[n]/1) * noise_op)
             if noise_model == "depolarizing":
-                noise_op = sx_list[n]+sy_list[n]+sz_list[n]
-            c_op_list.append(np.sqrt(gammas[n]) * noise_op)
+                noise_op = sx_list[n]
+                c_op_list.append(np.sqrt(gammas[n]/1) * noise_op)
+                noise_op = sy_list[n]
+                c_op_list.append(np.sqrt(gammas[n]/1) * noise_op)
+                noise_op = sz_list[n]
+                c_op_list.append(np.sqrt(gammas[n]/1) * noise_op)
     
     
                 

@@ -1,6 +1,6 @@
 # Compiled python modules.
 *.pyc
-
+*.cpython-310*
 # Setuptools distribution folder.
 /dist/
 
@@ -31,3 +31,7 @@ version.py
 data*
 *.pdf
 *.png
+
+
+*.pyc
+*INFO

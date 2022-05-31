@@ -49,7 +49,7 @@ def expectation_value(rho, op, site, d=2):
 
 def run(chi_max=32, scale=1, gamma=0.05):
 
-    L = 32
+    L = 8
     # chi_max = 100
     epsilon = 1e-6
     dt = 0.01
@@ -133,7 +133,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
     with open(path / f"trr_err_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
         cPickle.dump(tr_erros, fh)
 
-    exact = 0
+    exact = 1
     if exact:
         L = 8
         solver = "me"  # use the ode solver
@@ -167,10 +167,10 @@ def run(chi_max=32, scale=1, gamma=0.05):
 
 
 if __name__ == "__main__":
-    plot_data = 0
-    for chi_max in [200]:
-        for scale in [0.5, 0.75]:#, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]:
-            for gamma in [0.001, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]:
+    plot_data = 1
+    for chi_max in [100]:
+        for scale in [1.0]:#, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]:
+            for gamma in [0.01]:#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]:
                 mzs, mxs, ts, mz_ex, mx_ex, tr_erros = run(chi_max, scale, gamma)
                 if plot_data:
                     if rank ==0:
