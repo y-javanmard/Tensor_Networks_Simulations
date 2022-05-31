@@ -119,9 +119,9 @@ def run(chi_max=32, scale=1, gamma=0.05):
     Hb = HBond(L, Jxs=Jx, Jys=Jy, Jzs=Jz, Hxs=hx, Hzs=hz, mus=mu, d=4)
 
     Hs = [(1.0 / scale) * Hb.h_bond(i) 
-          + (1./1.)*Hb.new_lindbladian(Hb.sx, i, gamma) 
-          + (1./1.)*Hb.new_lindbladian(Hb.sy, i, gamma)
-          + (1./1.)*Hb.new_lindbladian(Hb.sz, i, gamma) for i in range(L - 1)]
+          + (1./3.)*Hb.new_lindbladian(Hb.sx, i, gamma) 
+          + (1./3.)*Hb.new_lindbladian(Hb.sy, i, gamma)
+          + (1./3.)*Hb.new_lindbladian(Hb.sz, i, gamma) for i in range(L - 1)]
     # print(Hs)
 
     psi = MPS.af_product_state(L)
@@ -157,8 +157,8 @@ def run(chi_max=32, scale=1, gamma=0.05):
         
         
     for i in range(total_steps + 1):
-        rho, err = tebd_2nd_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
-        #rho, err = tebd_1st_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
+        #rho, err = tebd_2nd_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
+        rho, err = tebd_1st_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
 
         if rank == 0:
             if np.mod(i, int((gap_measure) * scale)) == (gap_measure * scale) - 1:
@@ -233,6 +233,8 @@ def run(chi_max=32, scale=1, gamma=0.05):
     else:
         mz_ex = 0.0 * np.array(ts)
         mx_ex = 0.0 * np.array(ts)
+        czz_ex = 0.0*np.array(ts)
+    #print(czz_ex)
 
     return mzs, mxs, czzs, ts, mz_ex, mx_ex,  czz_ex, tr_erros
 
