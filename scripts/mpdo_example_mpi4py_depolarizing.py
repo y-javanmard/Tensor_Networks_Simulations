@@ -76,10 +76,10 @@ def two_point_correlator(rho, op1, op2, site1, site2, d=2):
         _type_: _description_
     """
     mlist = []
-    nlist = []
+    #nlist = []
     for i in range(len(rho.Ms)):
         M = np.reshape(rho.Ms[i], (d, d, rho.Ms[i].shape[-2], rho.Ms[i].shape[-1]))
-        nlist.append(M)
+        #nlist.append(M)
         if i == site1:
             M = np.tensordot(op1, M, (1, 0))
         elif i == site2:
@@ -87,8 +87,8 @@ def two_point_correlator(rho, op1, op2, site1, site2, d=2):
         else: M = M
         mlist.append(M)
     rho1 = MPDO(mlist, rho.Ss, rho.bonds)
-    rho2 = MPDO(nlist, rho.Ss, rho.bonds)
-    c = overlap(rho1=rho2, rho2=rho1)
+    #rho2 = MPDO(nlist, rho.Ss, rho.bonds)
+    #c = overlap(rho1=rho2, rho2=rho1)
     c = expectation_value(rho1, np.eye(2), 0)
     return c
     
