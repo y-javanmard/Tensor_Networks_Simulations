@@ -119,9 +119,9 @@ def run(chi_max=32, scale=1, gamma=0.05):
     Hb = HBond(L, Jxs=Jx, Jys=Jy, Jzs=Jz, Hxs=hx, Hzs=hz, mus=mu, d=4)
 
     Hs = [(1.0 / scale) * Hb.h_bond(i) 
-          + (1./3.)*Hb.new_lindbladian(Hb.sx, i, gamma) 
-          + (1./3.)*Hb.new_lindbladian(Hb.sy, i, gamma)
-          + (1./3.)*Hb.new_lindbladian(Hb.sz, i, gamma) for i in range(L - 1)]
+          + (1./1.)*Hb.new_lindbladian(Hb.sx, i, gamma) 
+          + (1./1.)*Hb.new_lindbladian(Hb.sy, i, gamma)
+          + (1./1.)*Hb.new_lindbladian(Hb.sz, i, gamma) for i in range(L - 1)]
     # print(Hs)
 
     psi = MPS.af_product_state(L)

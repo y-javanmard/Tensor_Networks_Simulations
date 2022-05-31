@@ -99,11 +99,11 @@ def integrate(L, hx, hz, Jx, Jy, Jz, psi0, tlist, gammas, solver, noise_model="s
                 c_op_list.append(np.sqrt(gammas[n]/1) * noise_op)
             if noise_model == "depolarizing":
                 noise_op = sx_list[n]
-                c_op_list.append(np.sqrt(gammas[n]/3) * noise_op)
+                c_op_list.append(np.sqrt(gammas[n]) * noise_op)
                 noise_op = sy_list[n]
-                c_op_list.append(np.sqrt(gammas[n]/3) * noise_op)
+                c_op_list.append(np.sqrt(gammas[n]) * noise_op)
                 noise_op = sz_list[n]
-                c_op_list.append(np.sqrt(gammas[n]/3) * noise_op)
+                c_op_list.append(np.sqrt(gammas[n]) * noise_op)
     
     
                 
