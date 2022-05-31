@@ -127,9 +127,9 @@ def run(chi_max=32, scale=1, gamma=0.05):
     psi = MPS.af_product_state(L)
     rho = MPDO.from_mps_vidal(psi)
 
-    psi_ghz = MPS.GHZ_state(L)
+    psi_xf = MPS.GHZ_state(L)
     psi_f = MPS.initial_state_f(L)
-    rho = MPDO.from_mps_vidal(psi_f)
+    rho = MPDO.from_mps_vidal(psi_xf)
 
     ts = []
     mxs = []
@@ -139,6 +139,8 @@ def run(chi_max=32, scale=1, gamma=0.05):
     new_rho = apply_loc_op(rho, Hb.sz, int(L/2))
     czz = expectation_value(new_rho, Hb.sz, int(L/2)+1)
     czzs = [czz]
+    czz1s=[0.0]
+    czz2s=[0.0]
     tr_erros = [0.0]
     mxs.append(1.0)
     ts.append(0.0)
@@ -161,10 +163,6 @@ def run(chi_max=32, scale=1, gamma=0.05):
         if rank == 0:
             if np.mod(i, int((gap_measure) * scale)) == (gap_measure * scale) - 1:
                 norm = expectation_value(rho, Hb.s0, 0).real
-                
-                #new_rho = apply_loc_op(rho, Hb.sz, int(L/2))
-                #norm1 = expectation_value(new_rho, Hb.s0, 0).real
-                #czz = expectation_value(new_rho, Hb.sz, int(L/2)+1)/norm1
                 czz = two_point_correlator(rho, Hb.sz, Hb.sz, L/2, L/2 +1).real/norm
                 cz1 = expectation_value(rho, Hb.sz, int(L/2)).real/norm
                 cz2 = expectation_value(rho, Hb.sz, int(L/2)+1).real/norm
@@ -176,6 +174,8 @@ def run(chi_max=32, scale=1, gamma=0.05):
                 ts.append((i + 1) * dt)
                 tr_erros.append(err)
                 czzs.append(czz)
+                czz1s.append(cz1)
+                czz2s.append(cz2)
                 
                 # check_right_normalization(rho.Ms)
                 print(f"mx={mx:.5f}, mz={mz:.5f} t={(i+1)*dt}/{scale*final_time}")
@@ -194,12 +194,16 @@ def run(chi_max=32, scale=1, gamma=0.05):
         cPickle.dump(mzs, fh)
     with open(path / f"ts_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
         cPickle.dump(ts, fh)
-    #with open(path / f"rho_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-    #    cPickle.dump(rhos, fh)
+    with open(path / f"czz_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+        cPickle.dump(czzs, fh)
+    with open(path / f"czz1_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+        cPickle.dump(czz1s, fh)
+    with open(path / f"czz2_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+        cPickle.dump(czz2s, fh)
     with open(path / f"trr_err_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
         cPickle.dump(tr_erros, fh)
 
-    exact = 1
+    exact = 0
     if exact:
         L = 8
         solver = "me"  # use the ode solver
@@ -213,7 +217,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
         init_f = [qt.basis(2, 0), qt.basis(2, 0)] * int(L / 2)
         # print(init)
 
-        psi0 = qt.tensor(init_f)
+        psi0 = qt.tensor(init_xf)
 
         # tlist = np.linspace(0, 5, 100)
 
@@ -234,7 +238,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
 
 
 if __name__ == "__main__":
-    plot_data = 1
+    plot_data = 0
     for chi_max in [100]:
         for scale in [1.0]:#, 0.25, 0.5, 0.75]:#, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]:
             for gamma in [0.01]:#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]:
