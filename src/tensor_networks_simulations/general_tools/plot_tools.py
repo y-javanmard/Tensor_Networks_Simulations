@@ -20,15 +20,15 @@ def figure_styling():
     # params = {'axes.labelsize': 16,
     #      'axes.titlesize': 16}
     # plt.rcParams.update(params)
-    plt.rc("axes", linewidth=1.3, labelsize=23)
+    plt.rc("axes", linewidth=1.3, labelsize=28)
     # the axes attributes need to be set before the call to subplot
     # plt.rc('font', weight='bold')
-    plt.rc("xtick.major", size=7, pad=7)
-    plt.rc("ytick.major", size=7, pad=7)
+    plt.rc("xtick.major", size=6, pad=7)
+    plt.rc("ytick.major", size=6, pad=7)
     plt.rc("xtick.minor", size=4, pad=7)
     plt.rc("ytick.minor", size=4, pad=7)
-    plt.rc("xtick", labelsize=19)
-    plt.rc("ytick", labelsize=19)
+    plt.rc("xtick", labelsize=20)
+    plt.rc("ytick", labelsize=20)
 
     # plt.rcParams["font.family"] = "Times New Roman"
     # plt.rcParams["font.family"] = "serif"
