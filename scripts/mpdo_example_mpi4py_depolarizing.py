@@ -96,7 +96,7 @@ def two_point_correlator(rho, op1, op2, site1, site2, d=2):
 
 def run(chi_max=32, scale=1, gamma=0.05):
 
-    L = 8
+    L = 32
     # chi_max = 100
     epsilon = 1e-6
     dt = 0.01
@@ -147,7 +147,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
     mzs.append(0.0)
     
     
-    path = Path(f"data_depolarizing/subdata_{model}_{L}_{chi_max}")
+    path = Path(f"data_depolarizing_1st/subdata_{model}_{L}_{chi_max}")
     try:
         path.mkdir(parents=True, exist_ok=False)
     except FileExistsError:
@@ -157,8 +157,8 @@ def run(chi_max=32, scale=1, gamma=0.05):
         
         
     for i in range(total_steps + 1):
-        #rho, err = tebd_2nd_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
-        rho, err = tebd_1st_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
+        rho, err = tebd_2nd_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
+        #rho, err = tebd_1st_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
 
         if rank == 0:
             if np.mod(i, int((gap_measure) * scale)) == (gap_measure * scale) - 1:
@@ -188,20 +188,20 @@ def run(chi_max=32, scale=1, gamma=0.05):
                 print("--------------------------")
 
 
-    with open(path / f"mxs_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-        cPickle.dump(mxs, fh)
-    with open(path / f"mzs_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-        cPickle.dump(mzs, fh)
-    with open(path / f"ts_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-        cPickle.dump(ts, fh)
-    with open(path / f"czz_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-        cPickle.dump(czzs, fh)
-    with open(path / f"czz1_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-        cPickle.dump(czz1s, fh)
-    with open(path / f"czz2_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-        cPickle.dump(czz2s, fh)
-    with open(path / f"trr_err_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
-        cPickle.dump(tr_erros, fh)
+                with open(path / f"mxs_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+                    cPickle.dump(mxs, fh)
+                with open(path / f"mzs_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+                    cPickle.dump(mzs, fh)
+                with open(path / f"ts_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+                    cPickle.dump(ts, fh)
+                with open(path / f"czz_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+                    cPickle.dump(czzs, fh)
+                with open(path / f"czz1_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+                    cPickle.dump(czz1s, fh)
+                with open(path / f"czz2_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+                    cPickle.dump(czz2s, fh)
+                with open(path / f"trr_err_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
+                    cPickle.dump(tr_erros, fh)
 
     exact = 0
     if exact:
@@ -241,9 +241,9 @@ def run(chi_max=32, scale=1, gamma=0.05):
 
 if __name__ == "__main__":
     plot_data = 0
-    for chi_max in [100]:
-        for scale in [1.0]:#, 0.25, 0.5, 0.75]:#, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]:
-            for gamma in [0.01]:#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.015, 0.02, 0.025, 0.03, 0.035, 0.04, 0.045, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]:
+    for chi_max in [200]:
+        for scale in [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]:
+            for gamma in [0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]:
                 mzs, mxs, czzs, ts, mz_ex, mx_ex, czz_ex, tr_erros = run(chi_max, scale, gamma)
                 if plot_data:
                     if rank ==0:
