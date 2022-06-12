@@ -72,6 +72,8 @@ def integrate(L, hx, hz, Jx, Jy, Jz, psi0, tlist, gammas, solver, noise_model="s
         expect_list.append(sz_list[i])
     
     expect_list.append(sz_list[int(L/2)]*sz_list[int(L/2)+1])
+    rho0 = psi0 * psi0.dag()
+    expect_list.append(rho0)
 
     # construct the hamiltonian
     H = 0
@@ -111,7 +113,7 @@ def integrate(L, hx, hz, Jx, Jy, Jz, psi0, tlist, gammas, solver, noise_model="s
 
     # evolve and calculate expectation values
     if solver == "me":
-        result = qt.mesolve(H, psi0, tlist, c_op_list, expect_list)
+        result = qt.mesolve(H, psi0, tlist, c_op_list, expect_list,progress_bar=True )
     elif solver == "mc":
         ntraj = 500
         result = qt.mcsolve(H, psi0, tlist, c_op_list, expect_list, ntraj)
