@@ -132,18 +132,18 @@ def run(chi_max=32, scale=1, gamma=0.05):
     dt = 0.01
     gap_measure= int(0.1/dt) 
     print(f"dt={dt}, gap_measurements={gap_measure}")
-    final_time = 10
+    final_time = 8
     # total_steps = int(final_time/(scale*dt))
     total_steps = int((scale * final_time) / (dt))
     dt_list = np.array([dt,]* L)
     gamma = gamma
     model = "TFIChain"
 
-    Jx = -0.0 * np.ones(L)#*0.5
+    Jx = -0.1 * np.ones(L)#*0.5
     Jy = 0.0 * np.ones(L)#*0.5
     Jz = -1.0 * np.ones(L)#*0.5
-    hz = -0.2 * np.ones(L)#*0.5
-    hx = -0.15 * np.ones(L)#*0.5
+    hz = -0.0 * np.ones(L)#*0.5
+    hx = -0.1 * np.ones(L)#*0.5
     mu = 0.0 * np.ones(L)#*0.5
 
     Hb = HBond(L, Jxs=Jx, Jys=Jy, Jzs=Jz, Hxs=hx, Hzs=hz, mus=mu, d=4)
@@ -189,10 +189,10 @@ def run(chi_max=32, scale=1, gamma=0.05):
     else:
         print("Folder was created")
         
-        
+    #dt_list = 1j*dt_list
     for i in range(total_steps + 1):
-        rho, err = tebd_2nd_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
-        #rho, err = tebd_1st_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
+        #rho, err = tebd_2nd_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
+        rho, err = tebd_1st_order_vidal_mpdo_mpi4py(rho=rho, Hs=Hs, chi_max=chi_max, dt_list=dt_list, epsilon=epsilon, d=4)
 
         if rank == 0:
             if np.mod(i, int((gap_measure) * scale)) == (gap_measure * scale) - 1:
@@ -202,7 +202,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
                 cz2 = expectation_value(rho, Hb.sz, int(L/2)+1).real/norm
                 mz = sum([expectation_value(rho, Hb.sz, i).real for i in range(L)]) / L
                 mx = sum([expectation_value(rho, Hb.sx, i).real for i in range(L)]) / L
-                rate_f = -(L**-1.)*np.log(loschmidt_echo_square_norm(psi_in=psi_0, rho_vidal=rho)/(norm*norm).real)
+                rate_f = -(L**-1.)*np.log(loschmidt_echo_square_norm(psi_in=psi_0, rho_vidal=rho).real/(norm))
                 mxs.append(mx/ norm)
                 mzs.append(mz/ norm)
                 #rhos.append(rho)
@@ -249,6 +249,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
         # solver = "mc"   # use the monte-carlo solver
 
         # decoherence rate
+        #gamma = 0.0
         gammas = gamma * np.ones(L)
         print(gammas)
 
@@ -281,35 +282,46 @@ def run(chi_max=32, scale=1, gamma=0.05):
 
 if __name__ == "__main__":
     plot_data = 1
+    dta={}
+    L = 8
+    
+    gammas = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]
+    scales = [1.0]#[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+    
     for chi_max in [200]:
-        for scale in [1.0]:#[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]:
-            for gamma in [0.0]:#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]:
+        
+        for scale in scales:
+            for gamma in gammas:
                 mzs, mxs, czzs, rate_fs, ts, mz_ex, mx_ex, czz_ex, rate_f_ex, tr_erros = run(chi_max, scale, gamma)
-                if plot_data:
-                    if rank ==0:
-                        import matplotlib.pyplot as plt
-
-                        csfont = {"fontname": "Comic Sans MS"}
-                        hfont = {"fontname": "Helvetica"}
-
-                        fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 6))
-                        #ax[0].plot(ts, np.array(mx_ex), label="exact $<S_x>$")
-                        #x[0].plot(ts, np.array(mz_ex), label="exact $<S_z>$")
-                        #ax[0].plot(ts, np.array(czz_ex), label="exact $<c_{{zz}}>$")
-                        ax[0].plot(np.array(ts), np.array(rate_f_ex), label="exact $\mathcal{{L}}(t)$")
-                        
-                        ax[1].plot(ts, tr_erros)
-                        ax[1].set_yscale("log")
-                        #ax[0].plot(ts,1 * np.array(mxs), marker="o", ms=4, ls=":", label=rf"$<S_x>~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
-                        #ax[0].plot(ts, 1 * np.array(mzs), marker="s", ms=4, ls=":", label=rf"$<S_z>~ TEBD; \gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
-                        #ax[0].plot(ts,1 * np.array(czzs), marker="o", ms=4, ls=":", label=rf"$C_{{zz}}~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
-                        ax[0].plot(np.array(ts),(1.0) * np.array(rate_fs), marker="v", ms=4, ls=":", label=rf"$\mathcal{{L}}(t)~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
-                        ax[0].set_xlabel("time")
-                        ax[1].set_xlabel("time")
-                        ax[1].set_ylabel("truncation error")
-                        ax[0].set_ylabel("txpectation values")
-                        ax[0].legend(fontsize=12,frameon=False)
-                        plt.legend(fontsize=12, frameon=False)
-                        plt.tight_layout()
-                        plt.plot()
-                        plt.show()
+                dta[f"{scale}-{gamma}"] = mzs, mxs, czzs, rate_fs, ts, mz_ex, mx_ex, czz_ex, rate_f_ex, tr_erros
+                
+    if plot_data:
+        if rank ==0:
+            import matplotlib.pyplot as plt
+            fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 6))
+            csfont = {"fontname": "Comic Sans MS"}
+            hfont = {"fontname": "Helvetica"}
+            for scale in scales:
+                for gamma in gammas:
+            
+                    #ax[0].plot(ts, np.array(mx_ex), label="exact $<S_x>$")
+                    #x[0].plot(ts, np.array(mz_ex), label="exact $<S_z>$")
+                    #ax[0].plot(ts, np.array(czz_ex), label="exact $<c_{{zz}}>$")
+                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4]), np.array(dta[f"{scale}-{gamma}"][8]), label="exact $\mathcal{{L}}(t)$")
+                    
+                    ax[1].plot(np.array(dta[f"{scale}-{gamma}"][4]), np.array(dta[f"{scale}-{gamma}"][-1]))
+                    ax[1].set_yscale("log")
+                    #ax[0].plot(ts,1 * np.array(mxs), marker="o", ms=4, ls=":", label=rf"$<S_x>~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
+                    #ax[0].plot(ts, 1 * np.array(mzs), marker="s", ms=4, ls=":", label=rf"$<S_z>~ TEBD; \gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
+                    #ax[0].plot(ts,1 * np.array(czzs), marker="o", ms=4, ls=":", label=rf"$C_{{zz}}~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
+                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4]), np.array(dta[f"{scale}-{gamma}"][3]), marker="v", ms=4, ls=":", label=rf"$\mathcal{{L}}(t)~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
+                    ax[0].set_xlabel("time")
+                    ax[1].set_xlabel("time")
+                    ax[1].set_ylabel("truncation error")
+                    ax[0].set_ylabel("txpectation values")
+                    ax[0].legend(fontsize=10,frameon=False)
+            plt.legend(fontsize=12, frameon=False)
+            plt.tight_layout()
+            plt.plot()
+            plt.show()
+            plt.savefig(f"exact_vs_mpdo-{L}.pdf")

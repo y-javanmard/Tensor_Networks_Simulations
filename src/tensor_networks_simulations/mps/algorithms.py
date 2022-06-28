@@ -826,8 +826,21 @@ def tebd_vidal_mpdo_mpi4py_odd(
     return rho, truncation_err
 
 
-def tebd_2nd_order_vidal_mpdo_mpi4py_efficient(rho: MPDO, Hs: List, chi_max: int, dt_list: np.ndarray, epsilon=1e-6, d=4):
-    pass
+
+def tebd_2nd_order_vidal_mpdo_mpi4py_efficient(steps, rho: MPDO, Hs: List, chi_max: int, dt_list: np.ndarray, epsilon=1e-6, d=4):
+    truncation_err = 0
+    rho, discarded = tebd_vidal_mpdo_mpi4py_even(rho, Hs, chi_max, dt_list=0.5 * dt_list, epsilon=epsilon, d=d)
+    truncation_err += discarded
+    for _ in range(steps-1):
+        rho, discarded = tebd_vidal_mpdo_mpi4py_odd(rho, Hs, chi_max, dt_list=dt_list, epsilon=epsilon, d=d)
+        truncation_err += discarded
+        rho, discarded = tebd_vidal_mpdo_mpi4py_even(rho, Hs, chi_max, dt_list=dt_list, epsilon=epsilon, d=d)
+        truncation_err += discarded
+    rho, discarded = tebd_vidal_mpdo_mpi4py_odd(rho, Hs, chi_max, dt_list=dt_list, epsilon=epsilon, d=d)
+    truncation_err += discarded
+    rho, discarded = tebd_vidal_mpdo_mpi4py_even(rho, Hs, chi_max, dt_list=0.5 * dt_list, epsilon=epsilon, d=d)
+    truncation_err += discarded
+    return rho, truncation_err
 
 
 
