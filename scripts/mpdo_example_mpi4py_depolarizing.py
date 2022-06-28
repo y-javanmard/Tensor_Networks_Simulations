@@ -132,19 +132,19 @@ def run(chi_max=32, scale=1, gamma=0.05):
     dt = 0.01
     gap_measure= int(0.1/dt) 
     print(f"dt={dt}, gap_measurements={gap_measure}")
-    final_time = 8
+    final_time = 16
     # total_steps = int(final_time/(scale*dt))
     total_steps = int((scale * final_time) / (dt))
     dt_list = np.array([dt,]* L)
     gamma = gamma
     model = "TFIChain"
 
-    Jx = -0.1 * np.ones(L)#*0.5
-    Jy = 0.0 * np.ones(L)#*0.5
-    Jz = -1.0 * np.ones(L)#*0.5
-    hz = -0.0 * np.ones(L)#*0.5
-    hx = -0.1 * np.ones(L)#*0.5
-    mu = 0.0 * np.ones(L)#*0.5
+    Jx = -0.1 * np.ones(L)*0.5
+    Jy = 0.0 * np.ones(L)*0.5
+    Jz = -1.0 * np.ones(L)*0.5
+    hz = -0.0 * np.ones(L)*0.5
+    hx = -0.1 * np.ones(L)*0.5
+    mu = 0.0 * np.ones(L)*0.5
 
     Hb = HBond(L, Jxs=Jx, Jys=Jy, Jzs=Jz, Hxs=hx, Hzs=hz, mus=mu, d=4)
 
@@ -242,7 +242,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
                 with open(path / f"trr_err_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
                     cPickle.dump(tr_erros, fh)
 
-    exact = 1
+    exact = 0
     if exact:
         L = 8
         solver = "me"  # use the ode solver
@@ -275,6 +275,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
         mz_ex = 0.0 * np.array(ts)
         mx_ex = 0.0 * np.array(ts)
         czz_ex = 0.0*np.array(ts)
+        rate_f_ex= 0.0*np.array(ts)
     #print(czz_ex)
 
     return mzs, mxs, czzs, rate_fs, ts, mz_ex, mx_ex,  czz_ex, rate_f_ex, tr_erros
@@ -285,7 +286,7 @@ if __name__ == "__main__":
     dta={}
     L = 8
     
-    gammas = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]
+    gammas = [1e-20]#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]
     scales = [1.0]#[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
     
     for chi_max in [200]:
@@ -307,14 +308,14 @@ if __name__ == "__main__":
                     #ax[0].plot(ts, np.array(mx_ex), label="exact $<S_x>$")
                     #x[0].plot(ts, np.array(mz_ex), label="exact $<S_z>$")
                     #ax[0].plot(ts, np.array(czz_ex), label="exact $<c_{{zz}}>$")
-                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4]), np.array(dta[f"{scale}-{gamma}"][8]), label="exact $\mathcal{{L}}(t)$")
+                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][8]), label="exact $\mathcal{{L}}(t)$")
                     
-                    ax[1].plot(np.array(dta[f"{scale}-{gamma}"][4]), np.array(dta[f"{scale}-{gamma}"][-1]))
+                    ax[1].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][-1]))
                     ax[1].set_yscale("log")
                     #ax[0].plot(ts,1 * np.array(mxs), marker="o", ms=4, ls=":", label=rf"$<S_x>~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
                     #ax[0].plot(ts, 1 * np.array(mzs), marker="s", ms=4, ls=":", label=rf"$<S_z>~ TEBD; \gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
                     #ax[0].plot(ts,1 * np.array(czzs), marker="o", ms=4, ls=":", label=rf"$C_{{zz}}~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
-                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4]), np.array(dta[f"{scale}-{gamma}"][3]), marker="v", ms=4, ls=":", label=rf"$\mathcal{{L}}(t)~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
+                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][3]), marker="v", ms=4, ls=":", label=rf"$\mathcal{{L}}(t)~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
                     ax[0].set_xlabel("time")
                     ax[1].set_xlabel("time")
                     ax[1].set_ylabel("truncation error")
