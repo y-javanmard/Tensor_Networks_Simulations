@@ -5,3 +5,6 @@
 #### -paper: Quantum simulation of dynamical phase transitions in noisy quantum devices: https://arxiv.org/abs/2211.08318
 ## How to install in develop mode: 
 `pip install -e .`
+
+### How to run the scripts:
+`mpirun -n #number_of_threads script.py`
