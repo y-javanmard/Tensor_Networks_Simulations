@@ -1,4 +1,4 @@
-# tensor_networks_simulations:
+# Tensor Networks Simulations:
 ## Matrix Product Density Operators simulation:
 #### -Simulation of Lindblad master equation in order to simulate with one and two-qubit noise using matrix product density operators MPDO.
 #### -Investigating the performance of Zero Noise Extrapolation using MPDO
