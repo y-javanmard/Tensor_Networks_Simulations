@@ -595,9 +595,7 @@ def TEBD_alg_S_A(
     return rho, discarded
 
 
-def tebd_vidal_mpdo(
-    rho: MPDO, Hs: List, chi_max: int, dt_list, lattice_sites, epsilon, d=4
-):
+def tebd_vidal_mpdo(rho: MPDO, Hs: List, chi_max: int, dt_list, lattice_sites, epsilon, d=4):
     discarded = 0.0
 
     for p in lattice_sites:

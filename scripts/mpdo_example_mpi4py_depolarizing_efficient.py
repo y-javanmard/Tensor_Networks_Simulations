@@ -133,7 +133,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
     dt = 0.01
     gap_measure= int(0.2/dt) 
     print(f"dt={dt}, gap_measurements={gap_measure}")
-    final_time = 14
+    final_time = 8
     # total_steps = int(final_time/(scale*dt))
     total_steps = int((final_time) / (gap_measure*dt))
     print(f"total steps = {total_steps}")
@@ -243,7 +243,7 @@ def run(chi_max=32, scale=1, gamma=0.05):
                 with open(path / f"trr_err_scale-{scale}_gamma-{gamma}.pickle", "wb") as fh:
                     cPickle.dump(tr_erros, fh)
 
-    exact = 0
+    exact = 1
     if exact:
         L = 8
         solver = "me"  # use the ode solver
@@ -287,10 +287,12 @@ if __name__ == "__main__":
     dta={}
     L = 8
     
-    gammas = [1e-3]#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]
-    scales = [1.0, 2.0]#[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
-    
-    for chi_max in [200]:
+    gammas = [1e-5, 1e-3, 0.01, 0.1]#[0.001, 0.0025, 0.005, 0.0075, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5]:#[0.001, 0.0025, 0.005, 0.0075, 0.015, 0.02, 0.03 ]:#[0.01, 0.05, 0.1, 0.25, 0.5]
+    scales = [1.0]#[1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+    import seaborn as sns
+
+    colors = sns.color_palette('viridis_r', n_colors=4)
+    for chi_max in [100]:
         
         for scale in scales:
             for gamma in gammas:
@@ -304,23 +306,23 @@ if __name__ == "__main__":
             csfont = {"fontname": "Comic Sans MS"}
             hfont = {"fontname": "Helvetica"}
             for scale in scales:
-                for gamma in gammas:
+                for i, gamma in enumerate(gammas):
             
                     #ax[0].plot(ts, np.array(mx_ex), label="exact $<S_x>$")
                     #x[0].plot(ts, np.array(mz_ex), label="exact $<S_z>$")
                     #ax[0].plot(ts, np.array(czz_ex), label="exact $<c_{{zz}}>$")
-                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][8]), label="exact $\mathcal{{L}}(t)$")
+                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][8]), color = colors[i],label=rf"ED, $\gamma={gamma} $")
                     
-                    ax[1].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][-1]))
+                    ax[1].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][-1]), color = colors[i])
                     ax[1].set_yscale("log")
                     #ax[0].plot(ts,1 * np.array(mxs), marker="o", ms=4, ls=":", label=rf"$<S_x>~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
                     #ax[0].plot(ts, 1 * np.array(mzs), marker="s", ms=4, ls=":", label=rf"$<S_z>~ TEBD; \gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
                     #ax[0].plot(ts,1 * np.array(czzs), marker="o", ms=4, ls=":", label=rf"$C_{{zz}}~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
-                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][3]), marker="v", ms=4, ls=":", label=rf"$\mathcal{{L}}(t)~ TEBD;\gamma={gamma},~ \alpha={scale},~\chi_{{max}}={chi_max} $")
-                    ax[0].set_xlabel("time")
-                    ax[1].set_xlabel("time")
+                    ax[0].plot(np.array(dta[f"{scale}-{gamma}"][4])/scale, np.array(dta[f"{scale}-{gamma}"][3]), marker="v", ms=4, ls=":", color=colors[i], label=rf"MPDO, $\gamma={gamma}$")
+                    ax[0].set_xlabel(r"time $tJ$")
+                    ax[1].set_xlabel(r"time $tJ$")
                     ax[1].set_ylabel("truncation error")
-                    ax[0].set_ylabel("txpectation values")
+                    ax[0].set_ylabel(r"$\lambda(t)$")
                     ax[0].legend(fontsize=10,frameon=False)
             plt.legend(fontsize=12, frameon=False)
             plt.tight_layout()

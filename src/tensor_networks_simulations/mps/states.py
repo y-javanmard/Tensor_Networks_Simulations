@@ -12,7 +12,7 @@ class MPS:
 
     @classmethod
     def af_product_state(cls, L, d=2):
-        """Create an antiferromagnetc product state."""
+        """Create an antiferromagnetic product state."""
         B_list = []
         s_list = []
         bond_vec = []
@@ -50,7 +50,7 @@ class MPS:
     ###############################################################
     @classmethod
     def initial_state_dw(cls, L, d=2, dtype=complex):
-        "Create an antiferromagnetc product state."
+        "Create an antiferromagnetic product state."
         B_list = []
         s_list = []
         chi_vec = []
@@ -73,7 +73,7 @@ class MPS:
 
     @classmethod
     def initial_state_f(cls, L, d=2, dtype=complex):
-        "Create an ferromagnetc product state."
+        "Create an ferromagnetic product state."
         B_list = []
         s_list = []
         chi_vec = []
