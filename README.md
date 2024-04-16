@@ -7,4 +7,4 @@
 `pip install -e .`
 
 ### How to run the scripts:
-`mpirun -n #number_of_threads script.py`
+`mpirun -n #number_of_threads python script.py`
