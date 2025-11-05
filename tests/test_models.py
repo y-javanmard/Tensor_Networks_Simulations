@@ -2,9 +2,8 @@ import numpy as np
 from numpy.testing import assert_allclose, assert_array_equal
 import pytest
 
-# Paste your full code here or import from module
-# For this example, we'll assume the code is in the same file or imported
-from your_module import BondHamiltonian, HBond, H_bond_choi  # <-- replace with actual import
+
+from models import BondHamiltonian, HBond, H_bond_choi  # <-- replace with actual import
 
 @pytest.fixture
 def sample_system():
