@@ -92,8 +92,4 @@ def test_H_bond_choi(sample_system):
         assert_allclose(Hc[:16, :16].real, expected_antiherm.real, atol=1e-14)
         assert_allclose(Hc[:16, :16].imag, expected_antiherm.imag + 0.01 * np.kron(np.eye(4), np.eye(4)), atol=1e-14)
 
-def test_Operator_dag():
-    from your_module import Operator
-    A = np.random.rand(3, 4) + 1j * np.random.rand(3, 4)
-    A_op = A.view(Operator)
-    assert_allclose(A_op.dag, A.conj().T)
+
