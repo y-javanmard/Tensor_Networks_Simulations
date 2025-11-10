@@ -496,3 +496,157 @@ def mpo_inf_temperature(L):
     bonds_inf.append(1)
     mpo_inf = MPDO(Ms_inf, Ss_inf, bonds_inf)
     return mpo_inf
+
+
+
+import numpy as np
+from typing import List, Dict, Tuple
+
+# ---------- Pauli stack (4,2,2) ----------
+I = np.array([[1,0],[0,1]], dtype=complex)
+X = np.array([[0,1],[1,0]], dtype=complex)
+Y = np.array([[0,-1j],[1j,0]], dtype=complex)
+Z = np.array([[1,0],[0,-1]], dtype=complex)
+OPS = np.stack([I, X, Y, Z], axis=0)   # (4,2,2)
+
+def _safe_probs(p: np.ndarray, tol: float = 1e-15) -> np.ndarray:
+    p = np.real_if_close(np.asarray(p))
+    p = np.clip(p, 0.0, None)
+    s = float(p.sum())
+    if not np.isfinite(s) or s <= tol:
+        p = np.full_like(p, 0.25, dtype=float)
+    else:
+        p = (p / s).astype(float)
+    k = int(np.argmax(p))
+    p[k] += 1.0 - float(p.sum())
+    return p
+
+# ---------- Build MPDO site transfer matrices T_i[k] ----------
+def mpdo_site_transfer(Ai: np.ndarray, ops: np.ndarray = OPS) -> np.ndarray:
+    """
+    Ai: MPDO site tensor with shape (d, d, chiL, chiR)
+    returns T[k, chiL, chiR] with T[k] = sum_{s,t} Ai[s,t,:,:] * (ops[k]^T)[s,t]
+    """
+    d, d2, chiL, chiR = Ai.shape
+    assert d == d2 == 2, "This helper assumes qubits."
+    # contract over (s,t): ops^T on physical legs
+    # T[k, a, b] = Ai[s,t,a,b] * ops[k].T[s,t]
+    T = np.tensordot(Ai, ops.transpose(0,2,1), axes=([0,1],[1,2]))  # (chiL, chiR, 4)
+    return np.transpose(T, (2,0,1))  # (4, chiL, chiR)
+
+def mpdo_operator_transfer_list(Ms: List[np.ndarray], ops: np.ndarray = OPS) -> List[np.ndarray]:
+    """For each site tensor Ai (d,d,chiL,chiR) build T_i[k]."""
+    return [mpdo_site_transfer(Ai, ops) for Ai in Ms]  # each is (4, chiL, chiR)
+
+# ---------- One perfect-sampling pass on an MPDO ----------
+def _mpdo_sample_one_chain(T_list: List[np.ndarray],
+                           rng: np.random.Generator) -> Tuple[float, List[int]]:
+    """
+    T_list: list of length L; each item is T_i with shape (4, chiL, chiR).
+    Returns (Pi, digits) where Pi = product_i \hat{pi}_i(k_i).
+    """
+    L = len(T_list)
+    # start left environment as [1] row vector (open boundary)
+    ell = np.array([1.0 + 0.0j], dtype=complex)  # shape (chi0,) with chi0=1
+    Pi = 1.0
+    digits = []
+    for i in range(L):
+        Ti = T_list[i]                # (4, chiL, chiR)
+        # S_k = ell @ Ti[k]  → shape (chiR,)
+        S = np.einsum('a,kab->kb', ell, Ti, optimize=True)  # (4, chiR)
+        # weights: pi_i(k) = 0.5 * ||S_k||_2^2
+        probs_raw = 0.5 * np.sum(S * S.conj(), axis=1).real  # (4,)
+        probs = _safe_probs(probs_raw)
+
+        k = int(rng.choice(4, p=probs))
+        digits.append(k)
+        Pi *= float(probs[k])
+
+        denom = np.sqrt(max(2.0 * probs[k], 1e-300))
+        ell = S[k] / denom           # new row env (1 x chiR, stored as (chiR,))
+    return float(Pi), digits
+
+# ---------- Public: estimate M1, M2 for an MPDO ----------
+def estimate_magic_perfect_from_mpdo(Ms: List[np.ndarray],
+                                     *,
+                                     n_samples: int = 10_000,
+                                     seed: int = 0) -> Dict[str, float]:
+    """
+    Ms: list of MPDO site tensors Ai with shape (d=2, d=2, chiL, chiR).
+    Returns: dict with M1_nats, SE_M1_nats, M2_nats, SE_M2_nats, mean_sumPi2, N.
+    """
+    T_list = mpdo_operator_transfer_list(Ms, OPS)  # each T_i: (4, chiL, chiR)
+
+    rng = np.random.default_rng(seed)
+    PIs = np.empty(n_samples, dtype=float)
+    for t in range(n_samples):
+        Pi, _digits = _mpdo_sample_one_chain(T_list, rng)
+        PIs[t] = Pi
+
+    n = len(Ms)
+    ln2n = n * np.log(2.0)
+    eps = 1e-300
+
+    meanP = float(PIs.mean())
+    logs  = np.log(np.clip(PIs, eps, None))
+
+    M2 = -np.log(meanP + eps) - ln2n
+    M1 = -float(logs.mean()) - ln2n
+
+    m = len(PIs)
+    se_M2 = np.sqrt(PIs.var(ddof=1)/m) / max(meanP, eps)
+    se_M1 = np.sqrt(logs.var(ddof=1)/m)
+
+    return {
+        "M1_nats": M1,  "SE_M1_nats": float(se_M1),
+        "M2_nats": M2,  "SE_M2_nats": float(se_M2),
+        "mean_sumPi2": meanP, "N": m
+    }
+
+
+
+
+
+# ---------- Optional: exact enumeration via DP (small L) ----------
+def exact_magic_from_mpdo(Ms: List[np.ndarray]) -> Dict[str, float]:
+    """
+    Enumerate all 4^L strings exactly using dynamic programming on the MPDO transfers.
+    Only feasible for small L. Returns M1_nats, M2_nats (and sanity sums).
+    """
+    T_list = mpdo_operator_transfer_list(Ms, OPS)
+    # frontier: map digits_tuple -> (ell_rowvec, Pi_prefix)
+    frontier = {(): (np.array([1.0+0j], complex), 1.0)}
+    for Ti in T_list:
+        new_frontier = {}
+        # precompute raw norms for normalization per prefix (like Z_i)
+        for digs, (ell, Pi_pref) in frontier.items():
+            S = np.einsum('a,kab->kb', ell, Ti)  # (4, chiR)
+            w = 0.5 * np.sum(S * S.conj(), axis=1).real  # (4,)
+            Z = float(np.sum(np.clip(w, 0.0, None)))     # local normalization
+            if Z <= 0 or not np.isfinite(Z):
+                # degenerate case: spread uniformly
+                w = np.full(4, 0.25, float); Z = 1.0
+            for k in range(4):
+                p_raw = float(max(w[k], 0.0))
+                if p_raw == 0.0:  # skip zero-prob branches
+                    continue
+                p_norm = p_raw / Z
+                ell_new = S[k] / np.sqrt(max(2.0 * p_norm, 1e-300))
+                Pi_new  = Pi_pref * p_norm
+                new_frontier[digs + (k,)] = (ell_new, Pi_new)
+        frontier = new_frontier
+
+    Pis = np.array([Pi for (_d,(ell,Pi)) in frontier.items()], dtype=float)
+    Pis = np.clip(Pis, 0.0, None)
+    s = Pis.sum()
+    if s <= 0 or not np.isfinite(s):   # fallback normalize
+        Pis = np.full_like(Pis, 1.0/len(Pis), dtype=float)
+    else:
+        Pis /= s
+
+    n = len(Ms)
+    ln2n = n*np.log(2.0)
+    mask = Pis > 0.0
+    M1 = -float((Pis[mask]*np.log(Pis[mask])).sum()) - ln2n
+    M2 = -np.log(float((Pis*Pis).sum())) - ln2n
+    return {"M1_nats": M1, "M2_nats": M2, "sum_Pi": float(Pis.sum()), "sum_Pi2": float((Pis*Pis).sum())}
